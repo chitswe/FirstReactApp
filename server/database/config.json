@@ -1,0 +1,32 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "",
+    "database": "Attendance",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "define":{
+      "freezeTableName": true
+    }
+  },
+  "test": {
+    "username": "root",
+    "password": "root",
+    "database": "attendance_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "define":{
+      "freezeTableName": true
+    }
+  },
+  "production": {
+    "username": "root",
+    "password": "root",
+    "database": "attendance_production",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "define":{
+      "freezeTableName": true
+    }
+  }
+}

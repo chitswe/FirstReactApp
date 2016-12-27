@@ -1,0 +1,10 @@
+/**
+ * Created by ChitSwe on 12/19/16.
+ */
+{
+  "presets": ["es2015","react"],
+  "plugins": [
+    "react-hot-loader/babel",
+    "transform-object-rest-spread"
+  ]
+}

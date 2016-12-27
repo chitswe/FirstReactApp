@@ -1,0 +1,13 @@
+/**
+ * Created by ChitSwe on 12/22/16.
+ */
+
+import React from 'react';
+
+class Home extends React.Component{
+    render(){
+        return (<h1>Home</h1>);
+    }
+}
+
+export default Home;
