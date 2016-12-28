@@ -10,7 +10,7 @@ import { apolloExpress, graphiqlExpress } from 'apollo-server';
 import { makeExecutableSchema } from 'graphql-tools';
 import Schema from './server/data/schema';
 import Resolver from './server/data/resolver';
-import migration from './server/database/migrations/index';
+import {default as migration} from './server/database/migrations';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import routes from './client/routes';
@@ -146,7 +146,7 @@ if(app.settings.env !=='production') {
             console.log(err);
         else {
             console.log('Bundling finished.');
-            migration.then((migrations) => {
+                migration.then((migrations) => {
                 app.listen(port, () => {
                     console.log(`Server is running on port ${port}`);
                 });
