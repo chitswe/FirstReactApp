@@ -8,8 +8,8 @@ import db from './server/models';
 //import  './server/database/integration';
 import { apolloExpress, graphiqlExpress } from 'apollo-server';
 import { makeExecutableSchema } from 'graphql-tools';
-import Schema from './server/data/Schema';
-import Resolver from './server/data/Resolver';
+import Schema from './server/data/schema';
+import Resolver from './server/data/resolver';
 import migration from './server/database/migrations';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
@@ -139,17 +139,26 @@ const webpackConfig = {
     devtool: 'source-map'
 };
 */
-
-webpack(webpackConfig, function(err, stats) {
-   if(err)
-       console.log(err);
-   else{
-       console.log('Bundling finished.');
-       migration.then((migrations)=>{
-           app.listen(port,()=>{
-               console.log(`Server is running on port ${port}`);
-           });
-       });
-   }
-});
+if(app.settings.env !=='production') {
+    console.log('Start webpack bundling');
+    webpack(webpackConfig, function (err, stats) {
+        if (err)
+            console.log(err);
+        else {
+            console.log('Bundling finished.');
+            migration.then((migrations) => {
+                app.listen(port, () => {
+                    console.log(`Server is running on port ${port}`);
+                });
+            });
+        }
+    });
+}else{
+    console.log('Production mod and skip bundling.');
+    migration.then((migrations) => {
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
+        });
+    });
+}
 
