@@ -100,7 +100,7 @@ html,body,#content,div[data-reactroot]{
 }
 
 .raw-log-card{
-    padding:5px;
+    padding:5px 0;
 }
 .raw-log-card .ldate{
     padding:5px 65px;
@@ -123,14 +123,16 @@ html,body,#content,div[data-reactroot]{
     border-radius: 50%;
 }
 
-.inlog-card{
+.inlog-card,.outlog-card{
     display:flex;
     flex-direction: row;
     align-items: center;
 }
-#emp_detail_browser .inlog-card .row.wrapper{
+#emp_detail_browser .inlog-card .row.wrapper,
+#emp_detail_browser .outlog-card .row.wrapper{
     height:500px;
     overflow-y:scroll;
+    justify-content: space-around;
 }
 
 

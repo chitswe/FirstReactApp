@@ -4,15 +4,14 @@ import {Card, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card
 import {graphql} from 'react-apollo';
 import gql from 'graphql-tag';
 import {propType} from 'graphql-anywhere';
-import DatePicker from 'material-ui/DatePicker';
 import Calendar from 'material-ui/DatePicker/Calendar';
-import {dateTimeFormat} from 'material-ui/DatePicker/dateUtils';
 import ImageTimer from 'material-ui/svg-icons/image/timer';
 import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit';
 import NavigationCheck from 'material-ui/svg-icons/navigation/check';
 import muiThemeable from 'material-ui/styles/muiThemeable';
 import {white} from 'material-ui/styles/colors';
-import scrollToComponent from 'react-scroll-to-component';
+import {Tabs, Tab} from 'material-ui/Tabs';
+import CircularProgress from 'material-ui/CircularProgress';
 
 class RawLogItem extends React.Component {
     constructor(){
@@ -62,6 +61,74 @@ RawLogItem.fragments={
 
 
 
+class RawOutLogCard extends React.Component{
+    constructor(){
+        super(...arguments);
+        this.state={
+            selectedDate:null
+        };
+    }
+    componentDidUpdate(prevProps,prevState) {
+        // only scroll into view if the active item changed last render
+        if (this.state.selectedDate !== prevState.selectedDate) {
+            this.ensureActiveItemVisible();
+        }
+    }
+
+    ensureActiveItemVisible() {
+        var itemComponent = this.refs.activeItem;
+        if (itemComponent) {
+            var domNode = ReactDOM.findDOMNode(itemComponent);
+            this.scrollElementIntoViewIfNeeded(domNode);
+        }
+    }
+
+    scrollElementIntoViewIfNeeded(domNode) {
+        var containerDomNode = ReactDOM.findDOMNode(this);
+        domNode.scrollIntoView()
+    }
+    handleOnTouchTapDay(){
+        setTimeout(()=>{let selected = this.refs.calendar.getSelectedDate(); this.setState({selectedDate:selected.toDateOnlyJSON()});}, 300);
+    }
+    renderItem(l,i){
+        let log = {
+            LTime: l.LTime?new Date(l.LTime):null,
+            LDate:new Date(l.LDate),
+            EditedTime:l.EditedTime?new Date(l.EditedTime):null,
+            AppliedTime:l.AppliedTime? new Date(l.AppliedTime):null,
+            muiTheme:this.props.muiTheme
+        };
+        let active =this.state.selectedDate == log.AppliedTime.toDateOnlyJSON();
+        if(active) {
+            log.ref = "activeItem";
+        }
+        log.key = i;
+        log.active = active;
+        return (<RawLogItem {...log}/>);
+    }
+    render(){
+        let {loading,refetch,OutLog} = this.props;
+        return (
+            <div className="outlog-card">
+                <div className="row wrapper arround">
+                    {!loading? OutLog.map(this.renderItem.bind(this)):null}
+                </div>
+                <Calendar ref="calendar" firstDayOfWeek={0}  onTouchTapDay={this.handleOnTouchTapDay.bind(this)}/>
+            </div>
+        );
+    }
+}
+
+
+
+RawOutLogCard.propTypes={
+    loading:PropTypes.bool,
+    refetch:PropTypes.func,
+    OutLog:PropTypes.arrayOf(propType(RawLogItem.fragments.log))
+};
+
+const RawOutLogCardWithTheme = muiThemeable()(RawOutLogCard);
+
 class RawInLogCard extends React.Component{
     constructor(){
         super(...arguments);
@@ -110,15 +177,12 @@ class RawInLogCard extends React.Component{
     render(){
         let {loading,refetch,InLog} = this.props;
         return (
-            <Card>
-                <CardHeader title="Daily In"/>
-                <div className="inlog-card">
-                    <Calendar ref="calendar" firstDayOfWeek={0}  onTouchTapDay={this.handleOnTouchTapDay.bind(this)}/>
-                    <div className="row wrapper">
-                        {!loading? InLog.map(this.renderItem.bind(this)):null}
-                    </div>
+            <div className="inlog-card">
+                <Calendar ref="calendar" firstDayOfWeek={0}  onTouchTapDay={this.handleOnTouchTapDay.bind(this)}/>
+                <div className="row wrapper arround">
+                    {!loading? InLog.map(this.renderItem.bind(this)):null}
                 </div>
-            </Card>
+            </div>
         );
     }
 }
@@ -134,37 +198,36 @@ RawInLogCard.propTypes={
 const RawInLogCardWithTheme = muiThemeable()(RawInLogCard);
 
 
+
+
 class EmployeeDetail extends React.Component{
-    render(){
-        let {employee,loading,refetch}=this.props.data;
+    getCardContent(employee,loading,refetch){
         let avatarPath = `https://randomuser.me/api/portraits/thumb/women/${employee.id}.jpg`;
         let portraitPath = `https://randomuser.me/api/portraits/women/${employee.id}.jpg`;
         return (
-            <div id="employeeDetailCard" className={`${this.props.className}`}>
-                <Card style={{paddingBottom:'15px',marginBottom:'10px'}}>
-                    <CardHeader title={employee.Name} subtitle={"Id: " + employee.id} avatar={avatarPath}/>
-                    <div className="row">
-                       <div className="col-lg-3">
-                           <CardMedia
-                               style={{
-                                   width:'128px',
-                                   height:'128px',
-                                   margin:'0 auto'
+            <Card style={{paddingBottom: '15px', marginBottom: '10px'}}>
+                <CardHeader title={employee.Name} subtitle={"Id: " + employee.id} avatar={avatarPath}/>
+                <Tabs>
+                    <Tab label="In">
+                        <RawInLogCardWithTheme loading={loading} refetch={refetch} InLog={employee.InLog}/>
+                    </Tab>
+                    <Tab label="Out">
+                        <RawOutLogCardWithTheme loading={loading} refetch={refetch} OutLog={employee.OutLog}/>
+                    </Tab>
+                </Tabs>
+            </Card>
+        );
+    }
+    render(){
+        let {employee,loading,refetch}=this.props.data;
+        let cardContent = !loading ? this.getCardContent(employee,loading,refetch):<CircularProgress style={{marginTop:'30%',marginLeft:'45%',marginRight:'auto' }} mode="indeterminate" />;
 
-                               }}
-                               overlay={<span className="overlay">{employee.Active? 'Since ' +  (new Date(employee.HiredDate)).formatAsShortDate(): 'Retired ' + (new Date(employee.RetiredDate)).formatAsShortDate()}</span>}
-                           >
-                               <img src={portraitPath} />
-                           </CardMedia>
-                       </div>
-                        <div className="col-lg-9">
-                            <CardTitle title={employee.JobTitle} subtitle={employee.Active? 'Active ' +  (new Date(employee.HiredDate)).formatAsShortDate(): 'Retired ' + (new Date(employee.RetiredDate)).formatAsShortDate()} />
-                        </div>
-                    </div>
-                </Card>
-                <RawInLogCardWithTheme loading={loading} refetch={refetch} InLog={employee.InLog}/>
+        return (
+            <div id="employeeDetailCard" className={`${this.props.className}`}>
+                {cardContent}
             </div>
         );
+
     }
 }
 EmployeeDetail.fragments={
@@ -178,6 +241,9 @@ EmployeeDetail.fragments={
         HiredDate
         Active
         InLog{
+            ...logItem
+        }
+        OutLog{
             ...logItem
         }
     }
