@@ -24,7 +24,7 @@ import { ApolloProvider, renderToStringWithData } from 'react-apollo';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import webpack from 'webpack';
 import webpackConfig from './webpack.config';
-import latency from 'express-simulate-latency';
+//import latency from 'express-simulate-latency';
 
 injectTapEventPlugin();
 import Html from './server/html';
@@ -36,7 +36,7 @@ const proxyPort = 3132;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(latency({ min: 100, max: 500 }));
+//app.use(latency({ min: 100, max: 500 }));
 app.use('/graphql', apolloExpress( (req) => {
     return {
         schema: makeExecutableSchema({
