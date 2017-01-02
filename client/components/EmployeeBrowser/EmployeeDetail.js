@@ -219,7 +219,9 @@ class EmployeeDetail extends React.Component{
         );
     }
     render(){
-        let {employee,loading,refetch}=this.props.data;
+        let {employee,loading,refetch,error}=this.props.data;
+        if(error)
+            console.log(`Error exist ${error}`);
         let cardContent = !loading ? this.getCardContent(employee,loading,refetch):<CircularProgress style={{marginTop:'30%',marginLeft:'45%',marginRight:'auto' }} mode="indeterminate" />;
 
         return (
